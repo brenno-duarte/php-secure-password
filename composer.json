@@ -1,0 +1,17 @@
+{
+    "name": "brenno-duarte/php-secure-password",
+    "description": "SecurePassword is a PHP component for creating strong passwords using modern encryption.",
+    "keywords": [
+        "php-security",
+        "php",
+        "php-password"
+    ],
+    "require": {
+        "php": "^7.3|8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SecurePassword\\": "src/"
+        }
+    }
+}
