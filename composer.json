@@ -1,6 +1,7 @@
 {
     "name": "brenno-duarte/php-secure-password",
     "description": "SecurePassword is a PHP component for creating strong passwords using modern encryption.",
+    "license": "MIT",
     "keywords": [
         "php-security",
         "php",
