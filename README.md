@@ -128,3 +128,7 @@ $cost = $password->getOptimalBcryptCost();
 
 var_dump($cost);
 ```
+
+## License
+
+MIT
