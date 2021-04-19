@@ -46,6 +46,8 @@ $hash = $password->useArgon2()->createHash('my_password');
 $hash = $password->useArgon2(true)->createHash('my_password');
 ```
 
+If the type of algorithm is not provided, the default encryption will be 'PASSWORD_DEFAULT'.
+
 ## Returns information about the given hash
 
 To return the information of the created hash, use `$info` as `true`.
