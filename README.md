@@ -18,7 +18,7 @@ The code below shows an example for creating the hash. Simply use the `createHas
 use SecurePassword\SecurePassword;
 
 $password = new SecurePassword();
-$hash = $password->createHash('my_hash');
+$hash = $password->createHash('my_password');
 
 var_dump($hash);
 ```
@@ -34,16 +34,16 @@ You can change the type of algorithm used to generate the hash. It is possible t
 
 ```php
 # standard encryption
-$hash = $password->useDefault()->createHash('my_hash');
+$hash = $password->useDefault()->createHash('my_password');
 
 # Bcrypt encryption
-$hash = $password->useBcrypt()->createHash('my_hash');
+$hash = $password->useBcrypt()->createHash('my_password');
 
 # Argon2 encryption
-$hash = $password->useArgon2()->createHash('my_hash');
+$hash = $password->useArgon2()->createHash('my_password');
 
 # Argon2d encryption (with `true`)
-$hash = $password->useArgon2(true)->createHash('my_hash');
+$hash = $password->useArgon2(true)->createHash('my_password');
 ```
 
 ## Returns information about the given hash
@@ -51,7 +51,7 @@ $hash = $password->useArgon2(true)->createHash('my_hash');
 To return the information of the created hash, use `$info` as `true`.
 
 ```php
-$hash = $password->createHash('my_hash', true);
+$hash = $password->createHash('my_password', true);
 
 var_dump($hash);
 ```
@@ -61,8 +61,8 @@ var_dump($hash);
 Checks whether the hash in `$hash` is valid. If the hash entered does not match the options received in the `createHash` method, it is possible to regenerate a new hash in `$verify_needs_rehash`. This function also makes timing attacks difficult.
 
 ```php
-$hash = $password->createHash('my_hash');
-$res = $password->verifyHash('my_hash', $hash);
+$hash = $password->createHash('my_password');
+$res = $password->verifyHash('my_password', $hash);
 
 var_dump($res);
 ```
@@ -70,8 +70,8 @@ var_dump($res);
 You can change the type of algorithm that will be used to check the hash.
 
 ```php
-$hash = $password->useArgon2()->createHash('my_hash');
-$res = $password->useArgon2()->verifyHash('my_hash', $hash);
+$hash = $password->useArgon2()->createHash('my_password');
+$res = $password->useArgon2()->verifyHash('my_password', $hash);
 
 /** Return bool */
 var_dump($res);
@@ -80,10 +80,10 @@ var_dump($res);
 If the encryption type has been changed, you can generate a new hash with the new encryption. Use `true` for the last parameter.
 
 ```php
-$hash = $password->useArgon2()->createHash('my_hash');
-$res = $password->useArgon2()->verifyHash('my_hash', $hash, true);
+$hash = $password->useArgon2()->createHash('my_password');
+$res = $password->useArgon2()->verifyHash('my_password', $hash, true);
 
-/** Return string|new hash */
+/** Return bool or string */
 var_dump($res);
 ```
 
@@ -97,16 +97,16 @@ Add options in the `useDefault`, `useBcrypt` and `useArgon2` methods.
 
 ```php
 # standard encryption
-$hash = $password->useDefault([])->createHash('my_hash');
+$hash = $password->useDefault([])->createHash('my_password');
 
 # Bcrypt encryption
-$hash = $password->useBcrypt(10)->createHash('my_hash');
+$hash = $password->useBcrypt(10)->createHash('my_password');
 
 # Argon2 encryption
-$hash = $password->useArgon2(false, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD_ARGON2_DEFAULT_TIME_COST, PASSWORD_ARGON2_DEFAULT_THREADS)->createHash('my_hash');
+$hash = $password->useArgon2(false, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD_ARGON2_DEFAULT_TIME_COST, PASSWORD_ARGON2_DEFAULT_THREADS)->createHash('my_password');
 
 # Argon2d encryption (with `true`)
-$hash = $password->useArgon2(true, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD_ARGON2_DEFAULT_TIME_COST, PASSWORD_ARGON2_DEFAULT_THREADS)->createHash('my_hash');
+$hash = $password->useArgon2(true, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD_ARGON2_DEFAULT_TIME_COST, PASSWORD_ARGON2_DEFAULT_THREADS)->createHash('my_password');
 ```
 
 ## Changing the secret entry (recommended)
