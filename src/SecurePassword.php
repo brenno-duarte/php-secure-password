@@ -17,6 +17,10 @@ class SecurePassword extends HashAlgorithm
      */
     public function __construct()
     {
+        if (empty($this->algo)) {
+            $this->algo = self::DEFAULT;
+        }
+
         $this->setPepper();
     }
 
@@ -52,10 +56,6 @@ class SecurePassword extends HashAlgorithm
      */
     public function createHash(string $password, bool $info = false)
     {
-        if (empty($this->algo)) {
-            $this->algo = self::DEFAULT;
-        }
-
         $pwd_peppered = $this->passwordPeppered($password);
         $pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
 
@@ -73,18 +73,13 @@ class SecurePassword extends HashAlgorithm
      * 
      * @param string $password
      * @param string $hash
-     * @param bool $verify_needs_rehash
      * 
      * @return mixed
      */
-    public function verifyHash(string $password, $hash, bool $verify_needs_rehash = false)
+    public function verifyHash(string $password, $hash)
     {
         if (is_array($hash)) {
             throw new HashException("You are returning the hash information. Enter 'false' in the 'createHash' method");
-        }
-
-        if (empty($this->algo)) {
-            $this->algo = self::DEFAULT;
         }
 
         $pph_strt = microtime(true);
@@ -92,13 +87,11 @@ class SecurePassword extends HashAlgorithm
 
         if (password_verify($pwd_peppered, $hash)) {
             try {
-                return $this->needsRehash($password, $hash, $verify_needs_rehash);
+                return true;
             } finally {
                 $end = (microtime(true) - $pph_strt);
                 $wait = bcmul((1 - $end), 1000000);  // usleep(250000) 1/4 of a second
                 usleep($wait);
-
-                #echo "<br>Execution time:" . (microtime(true) - $pph_strt) . "; ";
             }
         } else {
             return false;
@@ -133,22 +126,17 @@ class SecurePassword extends HashAlgorithm
      * 
      * @param string $password
      * @param string $hash
-     * @param bool $verify
      * 
      * @return mixed
      */
-    private function needsRehash(string $password, string $hash, bool $verify)
+    public function needsRehash(string $password, string $hash)
     {
-        if ($verify == true) {
-            if (password_needs_rehash($hash, $this->algo)) {
-                $newHash = $this->createHash($password);
+        if (password_needs_rehash($hash, $this->algo)) {
+            $newHash = $this->createHash($password);
 
-                return $newHash;
-            } else {
-                return true;
-            }
+            return $newHash;
         } else {
-            return true;
+            return false;
         }
     }
 

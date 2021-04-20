@@ -20,6 +20,7 @@ use SecurePassword\SecurePassword;
 $password = new SecurePassword();
 $hash = $password->createHash('my_password');
 
+/** Return string */
 var_dump($hash);
 ```
 
@@ -55,6 +56,7 @@ To return the information of the created hash, use `$info` as `true`.
 ```php
 $hash = $password->createHash('my_password', true);
 
+/** Return array */
 var_dump($hash);
 ```
 
@@ -66,6 +68,7 @@ Checks whether the hash in `$hash` is valid. If the hash entered does not match 
 $hash = $password->createHash('my_password');
 $res = $password->verifyHash('my_password', $hash);
 
+/** Return bool */
 var_dump($res);
 ```
 
@@ -79,11 +82,11 @@ $res = $password->useArgon2()->verifyHash('my_password', $hash);
 var_dump($res);
 ```
 
-If the encryption type has been changed, you can generate a new hash with the new encryption. Use `true` for the last parameter.
+If the encryption type has been changed, you can generate a new hash with the new encryption. The `needsHash()` method checks whether the reported hash needs to be regenerated. Otherwise, it will return false.
 
 ```php
 $hash = $password->useArgon2()->createHash('my_password');
-$res = $password->useArgon2()->verifyHash('my_password', $hash, true);
+$needs = $password->useDefault()->needsRehash('my_password', $hash);
 
 /** Return bool or string */
 var_dump($res);
@@ -128,6 +131,7 @@ Here's a quick little function that will help you determine what cost parameter 
 $password = new SecurePassword();
 $cost = $password->getOptimalBcryptCost();
 
+/** Return int */
 var_dump($cost);
 ```
 
