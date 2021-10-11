@@ -8,7 +8,13 @@ Unlike just using `password_hash`, SecurePassword adds a secret entry (commonly 
 
 ## Requirements
 
-PHP >= 7.3 
+PHP >= 7.3
+
+## Installing via Composer
+
+```
+composer require brenno-duarte/php-secure-password
+```
 
 ## How to use
 
