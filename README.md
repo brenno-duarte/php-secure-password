@@ -8,7 +8,7 @@ Unlike just using `password_hash`, SecurePassword adds a secret entry (commonly 
 
 ## Requirements
 
-PHP >= 7.3
+PHP >= 7.4
 
 ## Installing via Composer
 
@@ -29,6 +29,26 @@ $hash = $password->createHash('my_password');
 /** Return string */
 var_dump($hash);
 ```
+
+## Settings
+
+You can change encryption settings without using the methods that will be listed below. To do this, enter the following code in the constructor:
+
+```php
+use SecurePassword\HashAlgorithm;
+
+$config = [
+    'algo' => HashAlgorithm::DEFAULT,
+    'cost' => 10,
+    'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
+    'time_cost' => PASSWORD_ARGON2_DEFAULT_TIME_COST,
+    'threads' => PASSWORD_ARGON2_DEFAULT_THREADS
+];
+
+$password = new SecurePassword($config);
+```
+
+You can use the following encryptions: `HashAlgorithm::DEFAULT`, `HashAlgorithm::BCRYPT`, `HashAlgorithm::ARGON2I`, `HashAlgorithm::ARGON2ID`.
 
 ## Changing the encryption algorithm
 
@@ -78,6 +98,8 @@ $res = $password->verifyHash('my_password', $hash);
 var_dump($res);
 ```
 
+**If you are using the settings passed in the constructor then you can ignore the code below.**
+
 You can change the type of algorithm that will be used to check the hash.
 
 ```php
@@ -99,6 +121,8 @@ var_dump($res);
 ```
 
 ## Adding options
+
+**If you are using the settings passed in the constructor then you can ignore the code below.**
 
 Add options in the `useDefault`, `useBcrypt` and `useArgon2` methods.
 

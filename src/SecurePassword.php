@@ -13,12 +13,34 @@ class SecurePassword extends HashAlgorithm
     private string $pepper;
 
     /**
-     * Construct
+     * @var array
      */
-    public function __construct()
+    private array $config = [
+        "algo" => self::DEFAULT,
+        "cost" => "",
+        "memory_cost" => "",
+        "time_cost" => "",
+        "threads" => ""
+    ];
+
+    /**
+     * @param array $config
+     */
+    public function __construct(array $config = [])
     {
-        if (empty($this->algo)) {
-            $this->algo = self::DEFAULT;
+        if (!empty($config)) {
+            foreach ($config as $key => $value) {
+                if (!isset($this->config[$key])) {
+                    throw new HashException("Key '$key' not exists");
+                } else {
+                    $this->options = $config;
+                    $this->algo = $this->options['algo'];
+                }
+            }
+        } else {
+            if (empty($this->algo)) {
+                $this->algo = self::DEFAULT;
+            }
         }
 
         $this->setPepper();
@@ -147,7 +169,7 @@ class SecurePassword extends HashAlgorithm
      */
     private function createPepper(string $pepper): string
     {
-        $hash = openssl_encrypt($pepper, "AES-128-CBC", pack('a16', 'secret'), 0, pack('a16', 'secret2'));
+        $hash = openssl_encrypt($pepper, "AES-128-CBC", pack('a16', 'secure_password_1'), 0, pack('a16', 'secure_password_2'));
 
         return $hash;
     }
