@@ -52,6 +52,8 @@ You can use the following encryptions: `HashAlgorithm::DEFAULT`, `HashAlgorithm:
 
 ## Changing the encryption algorithm
 
+**NOTE: If you are using the settings passed in the constructor then you can ignore the code below.**
+
 You can change the type of algorithm used to generate the hash. It is possible to use `PASSWORD_BCRYPT`,` PASSWORD_ARGON2I`, `PASSWORD_ARGON2ID` and even `PASSWORD_DEFAULT`.
 
 `useDefault()` will use standard encryption
@@ -98,7 +100,7 @@ $res = $password->verifyHash('my_password', $hash);
 var_dump($res);
 ```
 
-**If you are using the settings passed in the constructor then you can ignore the code below.**
+**NOTE: If you are using the settings passed in the constructor then you can ignore the code below.**
 
 You can change the type of algorithm that will be used to check the hash.
 
@@ -122,7 +124,7 @@ var_dump($res);
 
 ## Adding options
 
-**If you are using the settings passed in the constructor then you can ignore the code below.**
+**NOTE: If you are using the settings passed in the constructor then you can ignore the code below.**
 
 Add options in the `useDefault`, `useBcrypt` and `useArgon2` methods.
 
