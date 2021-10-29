@@ -4,10 +4,10 @@ namespace SecurePassword;
 
 abstract class HashAlgorithm
 {
-    public const DEFAULT = PASSWORD_DEFAULT;
-    public const BCRYPT  = PASSWORD_BCRYPT;
-    public const ARGON2I = PASSWORD_ARGON2I;
-    public const ARGON2ID = PASSWORD_ARGON2ID;
+    const DEFAULT = PASSWORD_DEFAULT;
+    const BCRYPT  = PASSWORD_BCRYPT;
+    const ARGON2I = PASSWORD_ARGON2I;
+    const ARGON2ID = PASSWORD_ARGON2ID;
 
     /**
      * @var mixed
