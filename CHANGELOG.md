@@ -1,5 +1,19 @@
 # Released Notes
 
+## v2.0.0 - (2022-09-21)
+
+### Added
+
+- Added support for PHP 8
+- Added tests
+- Added `_toString` in exception
+
+### Changed
+
+- Changed `createHash` and `verifyHash` methods
+
+-----------------------------------------------------------
+
 ## v1.0.1 - (2021-10-29)
 
 ### Fixed
