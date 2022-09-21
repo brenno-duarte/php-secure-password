@@ -8,7 +8,7 @@ Unlike just using `password_hash`, SecurePassword adds a secret entry (commonly 
 
 ## Requirements
 
-PHP >= 7.4
+PHP >= 8.0
 
 ## Installing via Composer
 
@@ -18,13 +18,13 @@ composer require brenno-duarte/php-secure-password
 
 ## How to use
 
-The code below shows an example for creating the hash. Simply use the `createHash` method by entering your password.
+The code below shows an example for creating the hash. The `createHash` method generates the password hash along with the "peeper", and the `getHash` method returns the generated hash.
 
 ```php
 use SecurePassword\SecurePassword;
 
 $password = new SecurePassword();
-$hash = $password->createHash('my_password');
+$hash = $password->createHash('my_password')->getHash();
 
 /** Return string */
 var_dump($hash);
@@ -63,26 +63,26 @@ You can change the type of algorithm used to generate the hash. It is possible t
 
 ```php
 # standard encryption
-$hash = $password->useDefault()->createHash('my_password');
+$hash = $password->useDefault()->createHash('my_password')->getHash();
 
 # Bcrypt encryption
-$hash = $password->useBcrypt()->createHash('my_password');
+$hash = $password->useBcrypt()->createHash('my_password')->getHash();
 
 # Argon2 encryption
-$hash = $password->useArgon2()->createHash('my_password');
+$hash = $password->useArgon2()->createHash('my_password')->getHash();
 
 # Argon2d encryption (with `true`)
-$hash = $password->useArgon2(true)->createHash('my_password');
+$hash = $password->useArgon2(true)->createHash('my_password')->getHash();
 ```
 
 If the type of algorithm is not provided, the default encryption will be 'PASSWORD_DEFAULT'.
 
 ## Returns information about the given hash
 
-To return the information of the created hash, use `$info` as `true`.
+To return the information of the created hash, use `getHashInfo` method.
 
 ```php
-$hash = $password->createHash('my_password', true);
+$hash = $password->createHash('my_password')->getHashInfo();
 
 /** Return array */
 var_dump($hash);
@@ -90,11 +90,15 @@ var_dump($hash);
 
 ## Verifies that a password matches a hash
 
-Checks whether the hash in `$hash` is valid. If the hash entered does not match the options received in the `createHash` method, it is possible to regenerate a new hash in `$verify_needs_rehash`. This function also makes timing attacks difficult.
+To verify that the hash generated with `createHash` is valid, you can use `verifyHash` in two ways:
 
 ```php
-$hash = $password->createHash('my_password');
+# First way
+$hash = $password->createHash('my_password')->getHash();
 $res = $password->verifyHash('my_password', $hash);
+
+# Second way
+$hash = $password->createHash('my_password')->verifyHash();
 
 /** Return bool */
 var_dump($res);
@@ -105,7 +109,7 @@ var_dump($res);
 You can change the type of algorithm that will be used to check the hash.
 
 ```php
-$hash = $password->useArgon2()->createHash('my_password');
+$hash = $password->useArgon2()->createHash('my_password')->getHash();
 $res = $password->useArgon2()->verifyHash('my_password', $hash);
 
 /** Return bool */
@@ -115,7 +119,7 @@ var_dump($res);
 If the encryption type has been changed, you can generate a new hash with the new encryption. The `needsHash()` method checks whether the reported hash needs to be regenerated. Otherwise, it will return false.
 
 ```php
-$hash = $password->useArgon2()->createHash('my_password');
+$hash = $password->useArgon2()->createHash('my_password')->getHash();
 $needs = $password->useDefault()->needsRehash('my_password', $hash);
 
 /** Return bool or string */

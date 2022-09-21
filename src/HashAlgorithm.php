@@ -12,7 +12,7 @@ abstract class HashAlgorithm
     /**
      * @var mixed
      */
-    protected $algo;
+    protected mixed $algo;
 
     /**
      * @var array
@@ -20,6 +20,8 @@ abstract class HashAlgorithm
     protected array $options = [];
 
     /**
+     * @param array $options
+     * 
      * @return SecurePassword
      */
     public function useDefault(array $options = []): SecurePassword

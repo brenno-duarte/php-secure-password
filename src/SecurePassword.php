@@ -13,6 +13,16 @@ class SecurePassword extends HashAlgorithm
     private string $pepper;
 
     /**
+     * @var string
+     */
+    private string $pwd_hashed = "";
+
+    /**
+     * @var string
+     */
+    private string $password = "";
+
+    /**
      * @var array
      */
     private array $config = [
@@ -69,39 +79,54 @@ class SecurePassword extends HashAlgorithm
     }
 
     /**
-     * Creates a password peppered using the entered password and the secret entry. To return the 
-     * information of the created hash, use `$info` as `true`. 
+     * Creates a password peppered using the entered password and the secret entry. 
      * 
      * @param string $password
      * 
-     * @return mixed
+     * @return SecurePassword
      */
-    public function createHash(string $password, bool $info = false)
+    public function createHash(string $password): SecurePassword
     {
-        $pwd_peppered = $this->passwordPeppered($password);
-        $pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
+        $this->password = $password;
 
-        if ($info == true) {
-            return password_get_info($pwd_hashed);
-        }
+        $pwd_peppered = $this->passwordPeppered($this->password);
+        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
 
-        return $pwd_hashed;
+        return $this;
     }
 
     /**
-     * Checks whether the hash in `$hash` is valid. If the hash entered does not match the options 
-     * received in the `createHash` method, it is possible to regenerate a new hash in `$verify_needs_rehash`. 
-     * This function also makes timing attacks difficult. 
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return $this->pwd_hashed;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHashInfo(): array
+    {
+        return password_get_info($this->pwd_hashed);
+    }
+
+    /**
+     * Verify if the hash generated with `createHash` is valid
      * 
-     * @param string $password
-     * @param string $hash
+     * @param null|string $password
+     * @param null|string $hash
      * 
      * @return mixed
      */
-    public function verifyHash(string $password, $hash)
+    public function verifyHash(?string $password = null, ?string $hash = null): mixed
     {
-        if (is_array($hash)) {
-            throw new HashException("You are returning the hash information. Enter 'false' in the 'createHash' method");
+        if (is_null($password) && $this->password != "") {
+            $password = $this->password;
+        }
+
+        if (is_null($hash) && $this->pwd_hashed != "") {
+            $hash = $this->pwd_hashed;
         }
 
         $pph_strt = microtime(true);
@@ -151,10 +176,10 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return mixed
      */
-    public function needsRehash(string $password, string $hash)
+    public function needsRehash(string $password, string $hash): mixed
     {
         if (password_needs_rehash($hash, $this->algo)) {
-            $newHash = $this->createHash($password);
+            $newHash = $this->createHash($password)->getHash();
 
             return $newHash;
         } else {
@@ -169,9 +194,7 @@ class SecurePassword extends HashAlgorithm
      */
     private function createPepper(string $pepper): string
     {
-        $hash = openssl_encrypt($pepper, "AES-128-CBC", pack('a16', 'secure_password_1'), 0, pack('a16', 'secure_password_2'));
-
-        return $hash;
+        return openssl_encrypt($pepper, "AES-128-CBC", pack('a16', 'secure_password_1'), 0, pack('a16', 'secure_password_2'));
     }
 
     /**
@@ -183,8 +206,6 @@ class SecurePassword extends HashAlgorithm
      */
     private function passwordPeppered(string $password): string
     {
-        $pwd_peppered = hash_hmac("sha256", $password, $this->getPepper());
-
-        return $pwd_peppered;
+        return hash_hmac("sha256", $password, $this->getPepper());
     }
 }
