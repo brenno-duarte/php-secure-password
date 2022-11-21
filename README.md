@@ -56,10 +56,10 @@ You can use the following encryptions: `HashAlgorithm::DEFAULT`, `HashAlgorithm:
 
 You can change the type of algorithm used to generate the hash. It is possible to use `PASSWORD_BCRYPT`,` PASSWORD_ARGON2I`, `PASSWORD_ARGON2ID` and even `PASSWORD_DEFAULT`.
 
-`useDefault()` will use standard encryption
-`useBcrypt()` will use Bcrypt encryption
-`useArgon2()` will use Argon2 encryption
-`useArgon2(null)` passing `true` will use Argon2d encryption 
+- `useDefault()` will use standard encryption
+- `useBcrypt()` will use Bcrypt encryption
+- `useArgon2()` will use Argon2 encryption
+- `useArgon2(true)` passing `true` will use Argon2d encryption 
 
 ```php
 # standard encryption
