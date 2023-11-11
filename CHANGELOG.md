@@ -1,5 +1,19 @@
 # Released Notes
 
+## v3.0.0 - (2022-11-11)
+
+### Added
+
+- Added PHP 8.2 minimum version
+- Added classes for encryption: OpenSSL and Sodium support
+- Added `PepperTrait` trait to handle the peeper separately from the `SecuryPassword` class
+
+### Changed
+
+- Changed class structure
+
+-----------------------------------------------------------
+
 ## v2.0.0 - (2022-09-21)
 
 ### Added

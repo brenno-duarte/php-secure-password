@@ -8,7 +8,7 @@ Unlike just using `password_hash`, SecurePassword adds a secret entry (commonly 
 
 ## Requirements
 
-PHP >= 8.0
+PHP >= 8.2
 
 ## Installing via Composer
 
@@ -150,6 +150,45 @@ $hash = $password->useArgon2(false, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWOR
 $hash = $password->useArgon2(true, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD_ARGON2_DEFAULT_TIME_COST, PASSWORD_ARGON2_DEFAULT_THREADS)->createHash('my_password');
 ```
 
+## Using OpenSSL and Sodium encryption
+
+You can use OpenSSL and Sodium encryption using the `Encryption` class:
+
+```php 
+use SecurePassword\Encrypt\Encryption;
+
+$encryption = new Encryption('your-key');
+
+//Encrypt the message
+$encrypt = $encryption->encrypt("This is a text");
+
+echo $encrypt;
+```
+
+You can decrypt token by calling decrypt method:
+
+```php 
+$encryption = new Encryption('your-key');
+
+//Decrypt the message
+$decrypt = $encryption->decrypt($encrypt);
+
+echo $decrypt;
+```
+
+You can pass supported adapter to class like:
+
+Use of OpenSSL
+```php 
+$encryption = new Encryption(new OpenSslEncryption('your-key'));
+```
+Use of Sodium
+```php 
+$encryption = new Encryption(new SodiumEncryption('your-key'));
+```
+
+Default openSSL will use, you can use any one you want.
+
 ## Changing the secret entry (recommended)
 
 It is recommended to change the secret entry (or pepper) that will be added to your password. Use `setPepper` to change.
@@ -157,6 +196,16 @@ It is recommended to change the secret entry (or pepper) that will be added to y
 ```php
 $password = new SecurePassword();
 $password->setPepper('new_pepper');
+```
+
+By default, the `setPepper` method uses OpenSSL encryption. However, you can use Sodium encryption if you want.
+
+```php
+// Use OpenSSL
+$password->setPepper('new_pepper', 'openssl');
+
+// Use Sodium
+$password->setPepper('new_pepper', 'sodium');
 ```
 
 ## Getting the ideal encryption cost

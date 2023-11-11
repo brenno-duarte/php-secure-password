@@ -2,15 +2,13 @@
 
 namespace SecurePassword;
 
+use SecurePassword\PepperTrait;
 use SecurePassword\HashAlgorithm;
 use SecurePassword\HashException;
 
 class SecurePassword extends HashAlgorithm
 {
-    /**
-     * @var string
-     */
-    private string $pepper;
+    use PepperTrait;
 
     /**
      * @var string
@@ -23,59 +21,27 @@ class SecurePassword extends HashAlgorithm
     private string $password = "";
 
     /**
-     * @var array
-     */
-    private array $config = [
-        "algo" => self::DEFAULT,
-        "cost" => "",
-        "memory_cost" => "",
-        "time_cost" => "",
-        "threads" => ""
-    ];
-
-    /**
      * @param array $config
      */
-    public function __construct(array $config = [])
-    {
-        if (!empty($config)) {
-            foreach ($config as $key => $value) {
-                if (!isset($this->config[$key])) {
-                    throw new HashException("Key '$key' not exists");
-                } else {
-                    $this->options = $config;
-                    $this->algo = $this->options['algo'];
-                }
+    public function __construct(
+        private array $config = [
+            "algo" => HashAlgorithm::DEFAULT,
+            "cost" => "",
+            "memory_cost" => "",
+            "time_cost" => "",
+            "threads" => ""
+        ]
+    ) {
+        foreach ($config as $key => $value) {
+            if (!isset($this->config[$key])) {
+                throw new HashException("Key '$key' not exists");
             }
-        } else {
-            if (empty($this->algo)) {
-                $this->algo = self::DEFAULT;
-            }
+
+            $this->options = $this->config;
+            $this->algo = $this->config['algo'];
         }
 
         $this->setPepper();
-    }
-
-    /**
-     * Create a secret entry (commonly called `pepper`)
-     * 
-     * @param string $pepper
-     * 
-     * @return SecurePassword
-     */
-    public function setPepper(string $pepper = "default_hash"): SecurePassword
-    {
-        $this->pepper = $this->createPepper($pepper);
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPepper(): string
-    {
-        return $this->pepper;
     }
 
     /**
@@ -90,7 +56,8 @@ class SecurePassword extends HashAlgorithm
         $this->password = $password;
 
         $pwd_peppered = $this->passwordPeppered($this->password);
-        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
+
+        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo);
 
         return $this;
     }
@@ -104,9 +71,9 @@ class SecurePassword extends HashAlgorithm
     }
 
     /**
-     * @return array
+     * @return mixed
      */
-    public function getHashInfo(): array
+    public function getHashInfo(): mixed
     {
         return password_get_info($this->pwd_hashed);
     }
@@ -117,15 +84,15 @@ class SecurePassword extends HashAlgorithm
      * @param null|string $password
      * @param null|string $hash
      * 
-     * @return mixed
+     * @return bool
      */
-    public function verifyHash(?string $password = null, ?string $hash = null): mixed
+    public function verifyHash(?string $password = null, ?string $hash = null): bool
     {
-        if (is_null($password) && $this->password != "") {
+        if (is_null($password)) {
             $password = $this->password;
         }
 
-        if (is_null($hash) && $this->pwd_hashed != "") {
+        if (is_null($hash)) {
             $hash = $this->pwd_hashed;
         }
 
@@ -140,9 +107,9 @@ class SecurePassword extends HashAlgorithm
                 $wait = bcmul((1 - $end), 1000000);  // usleep(250000) 1/4 of a second
                 usleep($wait);
             }
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -174,38 +141,16 @@ class SecurePassword extends HashAlgorithm
      * @param string $password
      * @param string $hash
      * 
-     * @return mixed
+     * @return string|false
      */
-    public function needsRehash(string $password, string $hash): mixed
+    public function needsRehash(string $password, string $hash): string|false
     {
         if (password_needs_rehash($hash, $this->algo)) {
             $newHash = $this->createHash($password)->getHash();
 
             return $newHash;
-        } else {
-            return false;
         }
-    }
 
-    /**
-     * @param string $pepper
-     * 
-     * @return string
-     */
-    private function createPepper(string $pepper): string
-    {
-        return openssl_encrypt($pepper, "AES-128-CBC", pack('a16', 'secure_password_1'), 0, pack('a16', 'secure_password_2'));
-    }
-
-    /**
-     * Adds a secret entry (commonly called `pepper`) to the password 
-     * 
-     * @param string $password
-     * 
-     * @return string
-     */
-    private function passwordPeppered(string $password): string
-    {
-        return hash_hmac("sha256", $password, $this->getPepper());
+        return false;
     }
 }
