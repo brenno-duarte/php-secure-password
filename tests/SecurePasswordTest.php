@@ -1,8 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use SecurePassword\HashAlgorithm;
-use SecurePassword\SecurePassword;
+use SecurePassword\{HashAlgorithm, SecurePassword};
 
 class SecurePasswordTest extends TestCase
 {
@@ -38,10 +37,12 @@ class SecurePasswordTest extends TestCase
 
         $this->assertIsString($hash);
 
-        $password->setPepper('new_other_pepper', 'sodium');
-        $hash = $password->createHash('my_password')->getHash();
+        if (extension_loaded('sodium')) {
+            $password->setPepper('new_other_pepper', 'sodium');
+            $hash = $password->createHash('my_password')->getHash();
 
-        $this->assertIsString($hash);
+            $this->assertIsString($hash);
+        }
     }
 
     public function testChangeHashAlgorithm()
@@ -65,11 +66,26 @@ class SecurePasswordTest extends TestCase
 
     public function testCreateWithOtherAlgorithm()
     {
+        /* Example 1 */
         $password = new SecurePassword();
         $hash = $password->useArgon2()->createHash('my_password')->getHash();
         $needs = $password->useDefault()->needsRehash('my_password', $hash);
 
         $this->assertIsString($needs);
+
+        /* Example 2 */
+        $password_bcrypt = new SecurePassword([
+            'algo' => HashAlgorithm::BCRYPT
+        ]);
+        $needs2 = $password_bcrypt->needsRehash('my_password', $hash);
+        $this->assertIsString($needs2);
+
+        /* Example 3 */
+        $password_argon = new SecurePassword([
+            'algo' => HashAlgorithm::ARGON2I
+        ]);
+        $needs3 = $password_argon->needsRehash('my_password', $hash);
+        $this->assertFalse($needs3);
     }
 
     public function testHashInfo()
@@ -84,8 +100,10 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->verifyHash();
+        $hash2 = $password->verifyHash(md5('WrongHashTest'));
 
         $this->assertTrue($hash);
+        $this->assertFalse($hash2);
     }
 
     public function testCreateAndVerifyHash()
@@ -99,13 +117,19 @@ class SecurePasswordTest extends TestCase
 
     public function testVerifyHash()
     {
-        $hash = '$2y$10$Er0wYRuY7LTYkmWmL8YMMeuxiRIEZ7Vn/8kPb4.aNkzIFRN/N.qG.';
-        $res = (new SecurePassword())->verifyHash('my_password', $hash);
+        $password = new SecurePassword();
+        $hash = $password->createHash('my_password')->getHash();
+        $res = $password->verifyHash('my_password', $hash);
 
         $this->assertTrue($res);
 
         $password = new SecurePassword();
         $res = $password->createHash('my_password')->verifyHash();
+
+        $this->assertTrue($res);
+
+        $password = new SecurePassword();
+        $res = $password->createHash('my_password')->verifyHash(wait_microseconds: 300000);
 
         $this->assertTrue($res);
     }
@@ -128,8 +152,13 @@ class SecurePasswordTest extends TestCase
 
     public function testOptimalBcryptCost()
     {
-        $res = (new SecurePassword)->getOptimalBcryptCost();
+        $optimal_cost = SecurePassword::getOptimalBcryptCost('my_password');
+        $this->assertIsInt($optimal_cost);
+    }
 
+    public function testBenchmarkCost()
+    {
+        $res = SecurePassword::benchmarkCost('my_password');
         $this->assertIsInt($res);
     }
 }

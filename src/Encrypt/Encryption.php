@@ -11,11 +11,7 @@ class Encryption
      */
     public function __construct(
         private AbstractAdapterInterface $adapter
-    )
-    {
-        if ($this->adapter === null) {
-            throw new \InvalidArgumentException('The adapter class should not be null.');
-        }
+    ) {
     }
 
     /**

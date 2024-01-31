@@ -8,7 +8,8 @@
         "php-password"
     ],
     "require": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "paragonie/sodium_compat": "^1.20"
     },
     "require-dev": {
         "phpunit/phpunit": "^10"

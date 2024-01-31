@@ -104,6 +104,20 @@ $hash = $password->createHash('my_password')->verifyHash();
 var_dump($res);
 ```
 
+To make timing attacks more difficult, the `verifyHash` method waits 0.25 seconds (250000 microseconds) to return the value. You can change this time by changing the third parameter.
+
+```php
+# First way
+$hash = $password->createHash('my_password')->getHash();
+$res = $password->verifyHash('my_password', $hash, 300000);
+
+# Second way
+$hash = $password->createHash('my_password')->verifyHash(wait_microseconds: 300000);
+
+/** Return bool */
+var_dump($res);
+```
+
 **NOTE: If you are using the settings passed in the constructor then you can ignore the code below.**
 
 You can change the type of algorithm that will be used to check the hash.
@@ -116,14 +130,34 @@ $res = $password->useArgon2()->verifyHash('my_password', $hash);
 var_dump($res);
 ```
 
-If the encryption type has been changed, you can generate a new hash with the new encryption. The `needsHash()` method checks whether the reported hash needs to be regenerated. Otherwise, it will return false.
+## Needs Rehash
+
+If the encryption type has been changed, you can generate a new hash with the new encryption. The `needsHash()` method checks whether the reported hash needs to be regenerated. Otherwise, it will return `false`.
 
 ```php
+/**
+ * EXAMPLE 1
+ */
+$password = new SecurePassword();
 $hash = $password->useArgon2()->createHash('my_password')->getHash();
 $needs = $password->useDefault()->needsRehash('my_password', $hash);
 
-/** Return bool or string */
-var_dump($res);
+/** Return string */
+var_dump($needs);
+
+/**
+ * EXAMPLE 2
+ */
+
+$hash = $password->createHash('my_password')->getHash();
+
+$password = new SecurePassword([
+    'algo' => HashAlgorithm::BCRYPT
+]);
+$needs = $password->needsRehash('my_password', $hash);
+
+/** Return false */
+var_dump($needs);
 ```
 
 ## Adding options
@@ -151,6 +185,8 @@ $hash = $password->useArgon2(true, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD
 ```
 
 ## Using OpenSSL and Sodium encryption
+
+Secure Password has the component [paragonie/sodium_compat](https://github.com/paragonie/sodium_compat). Therefore, it is not necessary to use the Sodium library in PECL format.
 
 You can use OpenSSL and Sodium encryption using the `Encryption` class:
 
@@ -213,11 +249,12 @@ $password->setPepper('new_pepper', 'sodium');
 Here's a quick little function that will help you determine what cost parameter you should be using for your server to make sure you are within this range.
 
 ```php
-$password = new SecurePassword();
-$cost = $password->getOptimalBcryptCost();
+$optimal_cost = SecurePassword::getOptimalBcryptCost('my_password');
 
-/** Return int */
-var_dump($cost);
+$password = new SecurePassword([
+    'cost' => $optimal_cost
+]);
+$hash = $password->createHash('my_password')->getHash();
 ```
 
 ## License

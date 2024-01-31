@@ -21,7 +21,7 @@ class SodiumEncryption implements AbstractAdapterInterface
         if ($key === '') {
             throw new \InvalidArgumentException('The key should not be empty string.');
         }
-
+        
         if (!function_exists('sodium_crypto_secretbox_keygen')) {
             throw new \Exception('The sodium php extension does not installed or enabled', 500);
         }

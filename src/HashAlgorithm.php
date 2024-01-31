@@ -65,10 +65,10 @@ abstract class HashAlgorithm
             'threads' => $threads
         ];
 
+        $this->algo = self::ARGON2I;
+
         if ($use_argon2d == true) {
             $this->algo = self::ARGON2ID;
-        } else {
-            $this->algo = self::ARGON2I;
         }
 
         return $this;

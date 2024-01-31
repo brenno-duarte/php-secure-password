@@ -2,9 +2,8 @@
 
 namespace SecurePassword;
 
-use SecurePassword\Encrypt\Adapter\OpenSslEncryption;
-use SecurePassword\Encrypt\Adapter\SodiumEncryption;
 use SecurePassword\Encrypt\Encryption;
+use SecurePassword\Encrypt\Adapter\{OpenSslEncryption, SodiumEncryption};
 
 trait PepperTrait
 {
@@ -56,7 +55,6 @@ trait PepperTrait
         $encryption = new Encryption(new SodiumEncryption($this->pepper));
         return $encryption->encrypt($this->pepper);
     }
-
 
     /**
      * Adds a secret entry (commonly called `pepper`) to the password 

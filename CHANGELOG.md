@@ -1,6 +1,27 @@
 # Released Notes
 
-## v3.0.0 - (2022-11-11)
+## v3.1.0 - (2024-02-xx)
+
+### Added
+
+- Added method to benchmark cost
+- Added microseconds in `usleep`
+- Added set cost using `getOptimalBcryptCost` class
+- Added `password_get_info` in `verifyHash`
+- Added `paragonie/sodium_compat` component
+
+### Fixed
+
+- Fixed usleep in `verifyHash` method
+- Fixed options at `password_hash`
+
+## Removed
+
+- Removed `HashException` class
+
+-----------------------------------------------------------
+
+## v3.0.0 - (2023-11-11)
 
 ### Added
 

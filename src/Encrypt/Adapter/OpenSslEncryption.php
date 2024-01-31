@@ -37,7 +37,7 @@ class OpenSslEncryption implements AbstractAdapterInterface
         if ($key === '') {
             throw new \InvalidArgumentException('The key should not be empty string.');
         }
-
+        
         $this->iv = openssl_random_pseudo_bytes($this->ivBytes($this->cipher));
         $this->key = hash('sha512', $key);
     }

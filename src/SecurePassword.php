@@ -2,9 +2,10 @@
 
 namespace SecurePassword;
 
-use SecurePassword\PepperTrait;
-use SecurePassword\HashAlgorithm;
-use SecurePassword\HashException;
+use SecurePassword\{
+    PepperTrait,
+    HashAlgorithm
+};
 
 class SecurePassword extends HashAlgorithm
 {
@@ -21,26 +22,24 @@ class SecurePassword extends HashAlgorithm
     private string $password = "";
 
     /**
+     * @var int|null|null
+     */
+    private ?int $cost_min_ms = null;
+
+    /**
      * @param array $config
      */
     public function __construct(
         private array $config = [
             "algo" => HashAlgorithm::DEFAULT,
-            "cost" => "",
+            "cost" => "10",
             "memory_cost" => "",
             "time_cost" => "",
             "threads" => ""
         ]
     ) {
-        foreach ($config as $key => $value) {
-            if (!isset($this->config[$key])) {
-                throw new HashException("Key '$key' not exists");
-            }
-
-            $this->options = $this->config;
-            $this->algo = $this->config['algo'];
-        }
-
+        $this->options = $this->config;
+        $this->algo = $this->config['algo'];
         $this->setPepper();
     }
 
@@ -54,15 +53,15 @@ class SecurePassword extends HashAlgorithm
     public function createHash(string $password): SecurePassword
     {
         $this->password = $password;
-
         $pwd_peppered = $this->passwordPeppered($this->password);
-
-        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo);
+        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
 
         return $this;
     }
 
     /**
+     * Return password hash
+     * 
      * @return string
      */
     public function getHash(): string
@@ -71,6 +70,10 @@ class SecurePassword extends HashAlgorithm
     }
 
     /**
+     * Returns information about the given hash
+     * 
+     * @param string|null $hash
+     * 
      * @return mixed
      */
     public function getHashInfo(): mixed
@@ -83,10 +86,11 @@ class SecurePassword extends HashAlgorithm
      * 
      * @param null|string $password
      * @param null|string $hash
+     * @param int $wait
      * 
      * @return bool
      */
-    public function verifyHash(?string $password = null, ?string $hash = null): bool
+    public function verifyHash(?string $password = null, ?string $hash = null, int $wait_microseconds = 250000): bool
     {
         if (is_null($password)) {
             $password = $this->password;
@@ -96,33 +100,31 @@ class SecurePassword extends HashAlgorithm
             $hash = $this->pwd_hashed;
         }
 
-        $pph_strt = microtime(true);
-        $pwd_peppered = $this->passwordPeppered($password);
-
-        if (password_verify($pwd_peppered, $hash)) {
-            try {
-                return true;
-            } finally {
-                $end = (microtime(true) - $pph_strt);
-                $wait = bcmul((1 - $end), 1000000);  // usleep(250000) 1/4 of a second
-                usleep($wait);
-            }
+        if (password_get_info($hash)['algoName'] === 'unknown') {
+            return false;
         }
 
-        return false;
+        $pwd_peppered = $this->passwordPeppered($password);
+        $res = password_verify($pwd_peppered, $hash);
+        usleep($wait_microseconds);
+
+        return $res;
     }
 
     /**
      * Here's a quick little function that will help you determine what cost parameter you should be 
      * using for your server to make sure you are within this range.
      * 
-     * @param int $min_ms
      * @param string $password
+     * @param string $crypt
+     * @param int $min_ms
      * 
      * @return int
      */
-    public function getOptimalBcryptCost(int $min_ms = 250, string $password = "test"): int
-    {
+    public static function getOptimalBcryptCost(
+        string $password,
+        int $min_ms = 250
+    ): int {
         for ($i = 4; $i < 31; $i++) {
             $time_start = microtime(true);
             password_hash($password, PASSWORD_BCRYPT, ['cost' => $i]);
@@ -146,11 +148,35 @@ class SecurePassword extends HashAlgorithm
     public function needsRehash(string $password, string $hash): string|false
     {
         if (password_needs_rehash($hash, $this->algo)) {
-            $newHash = $this->createHash($password)->getHash();
-
-            return $newHash;
+            return $this->createHash($password)->getHash();
         }
 
         return false;
+    }
+
+    /**
+     * This code will benchmark your server to determine how high of a cost you can
+     * afford. You want to set the highest cost that you can without slowing down
+     * you server too much. 10 is a good baseline, and more is good if your servers
+     * are fast enough. The code below aims for ≤ 350 milliseconds stretching time,
+     * which is an appropriate delay for systems handling interactive logins.
+     * 
+     * @param string $password
+     * 
+     * @return int
+     */
+    public static function benchmarkCost(string $password): int
+    {
+        $timeTarget = 0.350; // 350 milliseconds
+        $cost = 10;
+
+        do {
+            $cost++;
+            $start = microtime(true);
+            password_hash($password, PASSWORD_BCRYPT, ["cost" => $cost]);
+            $end = microtime(true);
+        } while (($end - $start) < $timeTarget);
+
+        return $cost;
     }
 }
