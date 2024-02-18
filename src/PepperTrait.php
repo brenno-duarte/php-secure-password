@@ -13,6 +13,11 @@ trait PepperTrait
     private string $pepper;
 
     /**
+     * @var string
+     */
+    private string $crypt_type;
+
+    /**
      * Create a secret entry (commonly called `pepper`)
      * 
      * @param string $pepper
@@ -22,7 +27,9 @@ trait PepperTrait
     public function setPepper(string $pepper = "default_hash", string $crypt_type = "openssl"): self
     {
         $this->pepper = $pepper;
-        $this->pepper = match ($crypt_type) {
+        $this->crypt_type = $crypt_type;
+
+        $this->pepper = match ($this->crypt_type) {
             'openssl' => $this->useOpenSSL(),
             'sodium' => $this->useSodium(),
         };
@@ -35,6 +42,18 @@ trait PepperTrait
      */
     public function getPepper(): string
     {
+        if ($this->pepper !== '') {
+            if ($this->crypt_type == 'openssl') {
+                $encryption = new Encryption(new OpenSslEncryption($this->pepper));
+                $this->pepper = $encryption->decrypt($this->pepper);
+            }
+    
+            if ($this->crypt_type == 'sodium') {
+                $encryption = new Encryption(new SodiumEncryption($this->pepper));
+                $this->pepper = $encryption->decrypt($this->pepper);
+            }
+        }
+
         return $this->pepper;
     }
 

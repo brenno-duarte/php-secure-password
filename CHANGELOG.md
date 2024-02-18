@@ -1,5 +1,13 @@
 # Released Notes
 
+## v3.1.1 - (2024-02-18)
+
+### Fixed
+
+- Fixed `getPepper` method in `PepperTrait`
+
+-----------------------------------------------------------
+
 ## v3.1.0 - (2024-01-31)
 
 ### Added
