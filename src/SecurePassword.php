@@ -50,7 +50,7 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return SecurePassword
      */
-    public function createHash(string $password): SecurePassword
+    public function createHash(#[\SensitiveParameter] string $password): SecurePassword
     {
         $this->password = $password;
         $pwd_peppered = $this->passwordPeppered($this->password);
@@ -90,8 +90,11 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return bool
      */
-    public function verifyHash(?string $password = null, ?string $hash = null, int $wait_microseconds = 250000): bool
-    {
+    public function verifyHash(
+        #[\SensitiveParameter] ?string $password = null,
+        #[\SensitiveParameter] ?string $hash = null,
+        int $wait_microseconds = 250000
+    ): bool {
         if (is_null($password)) {
             $password = $this->password;
         }
@@ -121,10 +124,8 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return int
      */
-    public static function getOptimalBcryptCost(
-        string $password,
-        int $min_ms = 250
-    ): int {
+    public static function getOptimalBcryptCost(#[\SensitiveParameter] string $password, int $min_ms = 250): int
+    {
         for ($i = 4; $i < 31; $i++) {
             $time_start = microtime(true);
             password_hash($password, PASSWORD_BCRYPT, ['cost' => $i]);
@@ -145,8 +146,10 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return string|false
      */
-    public function needsRehash(string $password, string $hash): string|false
-    {
+    public function needsRehash(
+        #[\SensitiveParameter] string $password,
+        #[\SensitiveParameter] string $hash
+    ): string|false {
         if (password_needs_rehash($hash, $this->algo)) {
             return $this->createHash($password)->getHash();
         }

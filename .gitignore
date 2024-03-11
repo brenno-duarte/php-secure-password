@@ -1,5 +1,6 @@
 vendor/
 composer.lock
 index.php
+test.php
 .phpunit.result.cache
 .phpunit.cache

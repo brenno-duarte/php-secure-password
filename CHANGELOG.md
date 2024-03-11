@@ -1,5 +1,13 @@
 # Released Notes
 
+## v3.1.2 - (2024-03-11)
+
+### Fixed
+
+- Fixed `SensitiveParameter` attribute on passwords
+
+-----------------------------------------------------------
+
 ## v3.1.1 - (2024-02-18)
 
 ### Fixed

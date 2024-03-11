@@ -47,7 +47,7 @@ trait PepperTrait
                 $encryption = new Encryption(new OpenSslEncryption($this->pepper));
                 $this->pepper = $encryption->decrypt($this->pepper);
             }
-    
+
             if ($this->crypt_type == 'sodium') {
                 $encryption = new Encryption(new SodiumEncryption($this->pepper));
                 $this->pepper = $encryption->decrypt($this->pepper);
@@ -82,7 +82,7 @@ trait PepperTrait
      * 
      * @return string
      */
-    private function passwordPeppered(string $password): string
+    private function passwordPeppered(#[\SensitiveParameter] string $password): string
     {
         return hash_hmac("sha256", $password, $this->getPepper());
     }
