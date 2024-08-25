@@ -18,5 +18,8 @@
         "psr-4": {
             "SecurePassword\\": "src/"
         }
+    },
+    "suggest": {
+        "ext-libsodium": "To use Sodium encryption"
     }
 }

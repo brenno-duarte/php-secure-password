@@ -1,5 +1,18 @@
 # Released Notes
 
+## v3.1.3 - (2024-08-25)
+
+### Added
+
+- Added `AlgorithmEnum` enum
+
+### Changed
+
+- Changed default cost for bcrypt to 12
+- Changed constants in `HashAlgorithm` to deprecated
+
+-----------------------------------------------------------
+
 ## v3.1.2 - (2024-03-11)
 
 ### Fixed

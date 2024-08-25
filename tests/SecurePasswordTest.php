@@ -1,22 +1,23 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use SecurePassword\{HashAlgorithm, SecurePassword};
+use SecurePassword\{AlgorithmEnum, SecurePassword};
 
 class SecurePasswordTest extends TestCase
 {
+    private int $wait_time = 0;
+
     public function testCreateHash()
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->getHash();
-
         $this->assertIsString($hash);
     }
 
     public function testCreateHashWithConfig()
     {
         $config = [
-            'algo' => HashAlgorithm::ARGON2I,
+            'algo' => AlgorithmEnum::ARGON2I,
             'cost' => 10,
             'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
             'time_cost' => PASSWORD_ARGON2_DEFAULT_TIME_COST,
@@ -48,7 +49,7 @@ class SecurePasswordTest extends TestCase
     public function testChangeHashAlgorithm()
     {
         $password = new SecurePassword([
-            'algo' => HashAlgorithm::ARGON2I
+            'algo' => AlgorithmEnum::ARGON2I
         ]);
         $hash = $password->createHash('my_password')->getHash();
 
@@ -59,7 +60,7 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->useArgon2()->createHash('my_password')->getHash();
-        $res = $password->useArgon2()->verifyHash('my_password', $hash);
+        $res = $password->useArgon2()->verifyHash('my_password', $hash, $this->wait_time);
 
         $this->assertTrue($res);
     }
@@ -75,14 +76,15 @@ class SecurePasswordTest extends TestCase
 
         /* Example 2 */
         $password_bcrypt = new SecurePassword([
-            'algo' => HashAlgorithm::BCRYPT
+            'algo' => AlgorithmEnum::BCRYPT
         ]);
+
         $needs2 = $password_bcrypt->needsRehash('my_password', $hash);
         $this->assertIsString($needs2);
 
         /* Example 3 */
         $password_argon = new SecurePassword([
-            'algo' => HashAlgorithm::ARGON2I
+            'algo' => AlgorithmEnum::ARGON2I
         ]);
         $needs3 = $password_argon->needsRehash('my_password', $hash);
         $this->assertFalse($needs3);
@@ -92,7 +94,6 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->getHashInfo();
-
         $this->assertIsArray($hash);
     }
 
@@ -100,7 +101,7 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->verifyHash();
-        $hash2 = $password->verifyHash(md5('WrongHashTest'));
+        $hash2 = $password->verifyHash(md5('WrongHashTest'), $this->wait_time);
 
         $this->assertTrue($hash);
         $this->assertFalse($hash2);
@@ -110,8 +111,7 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->getHash();
-        $res = $password->verifyHash('my_password', $hash);
-
+        $res = $password->verifyHash('my_password', $hash, $this->wait_time);
         $this->assertTrue($res);
     }
 
@@ -119,25 +119,18 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->getHash();
-        $res = $password->verifyHash('my_password', $hash);
-
+        $res = $password->verifyHash('my_password', $hash, $this->wait_time);
         $this->assertTrue($res);
 
         $password = new SecurePassword();
-        $res = $password->createHash('my_password')->verifyHash();
-
-        $this->assertTrue($res);
-
-        $password = new SecurePassword();
-        $res = $password->createHash('my_password')->verifyHash(wait_microseconds: 300000);
-
+        $res = $password->createHash('my_password')->verifyHash(wait_microseconds: $this->wait_time);
         $this->assertTrue($res);
     }
 
     public function testVerifyHashWrong()
     {
         $hash = '$2y$10$Er0wYRuY7LTYkmWmL8YMMeuxiRIEZ7Vn/8kPb4.aNkzIFRN/N.qG.';
-        $res = (new SecurePassword)->verifyHash('mypassword', $hash);
+        $res = (new SecurePassword)->verifyHash('mypassword', $hash, $this->wait_time);
 
         $this->assertFalse($res);
     }

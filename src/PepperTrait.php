@@ -43,15 +43,11 @@ trait PepperTrait
     public function getPepper(): string
     {
         if ($this->pepper !== '') {
-            if ($this->crypt_type == 'openssl') {
-                $encryption = new Encryption(new OpenSslEncryption($this->pepper));
-                $this->pepper = $encryption->decrypt($this->pepper);
-            }
+            if ($this->crypt_type == 'openssl') $adapter = new OpenSslEncryption($this->pepper);
+            if ($this->crypt_type == 'sodium') $adapter = new SodiumEncryption($this->pepper);
 
-            if ($this->crypt_type == 'sodium') {
-                $encryption = new Encryption(new SodiumEncryption($this->pepper));
-                $this->pepper = $encryption->decrypt($this->pepper);
-            }
+            $encryption = new Encryption($adapter);
+            $this->pepper = $encryption->decrypt($this->pepper);
         }
 
         return $this->pepper;

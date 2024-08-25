@@ -4,7 +4,7 @@ SecurePassword is a PHP component for creating strong passwords using modern enc
 
 ## Why use this component?
 
-Unlike just using `password_hash`, SecurePassword adds a secret entry (commonly called a pepper) to make it difficult to break the generated hash.
+Unlike just using `password_hash` or `password_verify`, SecurePassword adds a secret entry (commonly called a pepper) to make it difficult to break the generated hash.
 
 ## Requirements
 
@@ -35,11 +35,11 @@ var_dump($hash);
 You can change encryption settings without using the methods that will be listed below. To do this, enter the following code in the constructor:
 
 ```php
-use SecurePassword\HashAlgorithm;
+use SecurePassword\AlgorithmEnum;
 
 $config = [
-    'algo' => HashAlgorithm::DEFAULT,
-    'cost' => 10,
+    'algo' => AlgorithmEnum::DEFAULT,
+    'cost' => 12,
     'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
     'time_cost' => PASSWORD_ARGON2_DEFAULT_TIME_COST,
     'threads' => PASSWORD_ARGON2_DEFAULT_THREADS
@@ -134,25 +134,24 @@ var_dump($res);
 
 If the encryption type has been changed, you can generate a new hash with the new encryption. The `needsHash()` method checks whether the reported hash needs to be regenerated. Otherwise, it will return `false`.
 
+**Example 1**
+
 ```php
-/**
- * EXAMPLE 1
- */
 $password = new SecurePassword();
 $hash = $password->useArgon2()->createHash('my_password')->getHash();
 $needs = $password->useDefault()->needsRehash('my_password', $hash);
 
 /** Return string */
 var_dump($needs);
+```
 
-/**
- * EXAMPLE 2
- */
+**Example 2**
 
+```php
 $hash = $password->createHash('my_password')->getHash();
 
 $password = new SecurePassword([
-    'algo' => HashAlgorithm::BCRYPT
+    'algo' => AlgorithmEnum::BCRYPT
 ]);
 $needs = $password->needsRehash('my_password', $hash);
 
@@ -167,7 +166,7 @@ var_dump($needs);
 Add options in the `useDefault`, `useBcrypt` and `useArgon2` methods.
 
 - useDefault: default options, use an array.
-- useBcrypt: you can change `$cost`. The default is `10`.
+- useBcrypt: you can change `$cost`. The default is `12`.
 - useArgon2: you can change `$memory_cost`, `$time_cost` and `$threads`. The default is the constants `PASSWORD_ARGON2_DEFAULT_MEMORY_COST`, `PASSWORD_ARGON2_DEFAULT_TIME_COST` and `PASSWORD_ARGON2_DEFAULT_THREADS`.
 
 ```php
@@ -175,7 +174,7 @@ Add options in the `useDefault`, `useBcrypt` and `useArgon2` methods.
 $hash = $password->useDefault([])->createHash('my_password');
 
 # Bcrypt encryption
-$hash = $password->useBcrypt(10)->createHash('my_password');
+$hash = $password->useBcrypt(12)->createHash('my_password');
 
 # Argon2 encryption
 $hash = $password->useArgon2(false, PASSWORD_ARGON2_DEFAULT_MEMORY_COST, PASSWORD_ARGON2_DEFAULT_TIME_COST, PASSWORD_ARGON2_DEFAULT_THREADS)->createHash('my_password');
@@ -197,7 +196,6 @@ $encryption = new Encryption('your-key');
 
 //Encrypt the message
 $encrypt = $encryption->encrypt("This is a text");
-
 echo $encrypt;
 ```
 
@@ -208,17 +206,19 @@ $encryption = new Encryption('your-key');
 
 //Decrypt the message
 $decrypt = $encryption->decrypt($encrypt);
-
 echo $decrypt;
 ```
 
 You can pass supported adapter to class like:
 
-Use of OpenSSL
+**Use of OpenSSL**
+
 ```php 
 $encryption = new Encryption(new OpenSslEncryption('your-key'));
 ```
-Use of Sodium
+
+**Use of Sodium**
+
 ```php 
 $encryption = new Encryption(new SodiumEncryption('your-key'));
 ```

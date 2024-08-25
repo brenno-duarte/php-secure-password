@@ -2,10 +2,8 @@
 
 namespace SecurePassword;
 
-use SecurePassword\{
-    PepperTrait,
-    HashAlgorithm
-};
+use SensitiveParameter;
+use SecurePassword\{PepperTrait, HashAlgorithm};
 
 class SecurePassword extends HashAlgorithm
 {
@@ -31,15 +29,19 @@ class SecurePassword extends HashAlgorithm
      */
     public function __construct(
         private array $config = [
-            "algo" => HashAlgorithm::DEFAULT,
-            "cost" => "10",
+            "algo" => AlgorithmEnum::DEFAULT,
+            "cost" => 12,
             "memory_cost" => "",
             "time_cost" => "",
             "threads" => ""
         ]
     ) {
+        ($this->config["algo"] instanceof AlgorithmEnum) ?
+            $algo_config = $this->config["algo"]->value :
+            $algo_config = $this->config["algo"];
+        
         $this->options = $this->config;
-        $this->algo = $this->config['algo'];
+        $this->algo = ($algo_config == "default") ? PASSWORD_DEFAULT : $algo_config;
         $this->setPepper();
     }
 
@@ -50,12 +52,11 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return SecurePassword
      */
-    public function createHash(#[\SensitiveParameter] string $password): SecurePassword
+    public function createHash(#[SensitiveParameter] string $password): SecurePassword
     {
         $this->password = $password;
         $pwd_peppered = $this->passwordPeppered($this->password);
         $this->pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
-
         return $this;
     }
 
@@ -91,27 +92,18 @@ class SecurePassword extends HashAlgorithm
      * @return bool
      */
     public function verifyHash(
-        #[\SensitiveParameter] ?string $password = null,
-        #[\SensitiveParameter] ?string $hash = null,
+        #[SensitiveParameter] ?string $password = null,
+        #[SensitiveParameter] ?string $hash = null,
         int $wait_microseconds = 250000
     ): bool {
-        if (is_null($password)) {
-            $password = $this->password;
-        }
-
-        if (is_null($hash)) {
-            $hash = $this->pwd_hashed;
-        }
-
-        if (password_get_info($hash)['algoName'] === 'unknown') {
-            return false;
-        }
+        if (is_null($password)) $password = $this->password;
+        if (is_null($hash)) $hash = $this->pwd_hashed;
+        if (password_get_info($hash)['algoName'] === 'unknown') return false;
 
         $pwd_peppered = $this->passwordPeppered($password);
-        $res = password_verify($pwd_peppered, $hash);
+        $result = password_verify($pwd_peppered, $hash);
         usleep($wait_microseconds);
-
-        return $res;
+        return $result;
     }
 
     /**
@@ -124,17 +116,17 @@ class SecurePassword extends HashAlgorithm
      * 
      * @return int
      */
-    public static function getOptimalBcryptCost(#[\SensitiveParameter] string $password, int $min_ms = 250): int
+    public static function getOptimalBcryptCost(#[SensitiveParameter] string $password, int $min_ms = 250): int
     {
         for ($i = 4; $i < 31; $i++) {
             $time_start = microtime(true);
             password_hash($password, PASSWORD_BCRYPT, ['cost' => $i]);
             $time_end = microtime(true);
 
-            if (($time_end - $time_start) * 1000 > $min_ms) {
-                return $i;
-            }
+            if (($time_end - $time_start) * 1000 > $min_ms) return $i;
         }
+
+        return 12;
     }
 
     /**
@@ -147,31 +139,27 @@ class SecurePassword extends HashAlgorithm
      * @return string|false
      */
     public function needsRehash(
-        #[\SensitiveParameter] string $password,
-        #[\SensitiveParameter] string $hash
+        #[SensitiveParameter] string $password,
+        #[SensitiveParameter] string $hash
     ): string|false {
-        if (password_needs_rehash($hash, $this->algo)) {
-            return $this->createHash($password)->getHash();
-        }
-
-        return false;
+        return (password_needs_rehash($hash, $this->algo)) ? $this->createHash($password)->getHash() : false;
     }
 
     /**
      * This code will benchmark your server to determine how high of a cost you can
      * afford. You want to set the highest cost that you can without slowing down
-     * you server too much. 10 is a good baseline, and more is good if your servers
+     * you server too much. 12 is a good baseline, and more is good if your servers
      * are fast enough. The code below aims for ≤ 350 milliseconds stretching time,
      * which is an appropriate delay for systems handling interactive logins.
      * 
      * @param string $password
+     * @param string $cost
      * 
      * @return int
      */
-    public static function benchmarkCost(string $password): int
+    public static function benchmarkCost(#[SensitiveParameter] string $password, int $cost = 12): int
     {
         $timeTarget = 0.350; // 350 milliseconds
-        $cost = 10;
 
         do {
             $cost++;

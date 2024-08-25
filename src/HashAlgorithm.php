@@ -4,9 +4,28 @@ namespace SecurePassword;
 
 abstract class HashAlgorithm
 {
+    /**
+     * @deprecated Use `AlgorithmEnum` enum
+     * @var mixed
+     */
     const DEFAULT = PASSWORD_DEFAULT;
+
+    /**
+     * @deprecated Use `AlgorithmEnum` enum
+     * @var mixed
+     */
     const BCRYPT  = PASSWORD_BCRYPT;
+
+    /**
+     * @deprecated Use `AlgorithmEnum` enum
+     * @var mixed
+     */
     const ARGON2I = PASSWORD_ARGON2I;
+
+    /**
+     * @deprecated Use `AlgorithmEnum` enum
+     * @var mixed
+     */
     const ARGON2ID = PASSWORD_ARGON2ID;
 
     /**
@@ -27,8 +46,7 @@ abstract class HashAlgorithm
     public function useDefault(array $options = []): SecurePassword
     {
         $this->options = $options;
-        $this->algo = self::DEFAULT;
-
+        $this->algo = PASSWORD_DEFAULT;
         return $this;
     }
 
@@ -37,11 +55,10 @@ abstract class HashAlgorithm
      * 
      * @return SecurePassword
      */
-    public function useBcrypt(int $cost = 10): SecurePassword
+    public function useBcrypt(int $cost = 12): SecurePassword
     {
         $this->options['cost'] = $cost;
-        $this->algo = self::BCRYPT;
-
+        $this->algo = AlgorithmEnum::BCRYPT->value;
         return $this;
     }
 
@@ -65,12 +82,8 @@ abstract class HashAlgorithm
             'threads' => $threads
         ];
 
-        $this->algo = self::ARGON2I;
-
-        if ($use_argon2d == true) {
-            $this->algo = self::ARGON2ID;
-        }
-
+        $this->algo = AlgorithmEnum::ARGON2I->value;
+        if ($use_argon2d == true) $this->algo = AlgorithmEnum::ARGON2ID->value;
         return $this;
     }
 }

@@ -34,10 +34,7 @@ class OpenSslEncryption implements AbstractAdapterInterface
      */
     public function __construct(string $key)
     {
-        if ($key === '') {
-            throw new \InvalidArgumentException('The key should not be empty string.');
-        }
-        
+        if ($key === '') throw new \InvalidArgumentException('The key should not be empty string.');
         $this->iv = openssl_random_pseudo_bytes($this->ivBytes($this->cipher));
         $this->key = hash('sha512', $key);
     }
@@ -47,11 +44,13 @@ class OpenSslEncryption implements AbstractAdapterInterface
      *
      * @param mixed $data => data to be encrypted
      *
-     * @return token
+     * @return mixed
      */
     public function encrypt(mixed $data): mixed
     {
-        return base64_encode(openssl_encrypt($data, $this->cipher, $this->key, 0, $this->iv).'&&'.bin2hex($this->iv));
+        return base64_encode(
+            openssl_encrypt($data, $this->cipher, $this->key, 0, $this->iv) . '&&' . bin2hex($this->iv)
+        );
     }
 
     /**
@@ -59,13 +58,12 @@ class OpenSslEncryption implements AbstractAdapterInterface
      *
      * @param mixed $token => encrypted token
 
-     * @return mix-data
+     * @return string|bool
      */
-    public function decrypt(mixed $token): mixed
+    public function decrypt(mixed $token): string|bool
     {
         $token = base64_decode($token);
         list($token, $this->iv) = explode('&&', $token);
-
         return openssl_decrypt($token, $this->cipher, $this->key, 0, hex2bin($this->iv));
     }
 
