@@ -1,5 +1,13 @@
 # Released Notes
 
+## v3.1.4 - (2024-09-12)
+
+### Fixed
+
+- Fixed `decrypt` method if a non hash is informed
+
+-----------------------------------------------------------
+
 ## v3.1.3 - (2024-08-25)
 
 ### Added

@@ -2,9 +2,9 @@
 
 namespace Lablnet\Tests;
 
-use SecurePassword\Encrypt\Adapter\{OpenSslEncryption, SodiumEncryption};
-use SecurePassword\Encrypt\Encryption;
 use PHPUnit\Framework\TestCase;
+use SecurePassword\Encrypt\Encryption;
+use SecurePassword\Encrypt\Adapter\{OpenSslEncryption, SodiumEncryption};
 
 class EncryptionTest extends TestCase
 {
@@ -32,15 +32,13 @@ class EncryptionTest extends TestCase
 
     public function testEncryptAndDecryptWithSodium()
     {
-        if (extension_loaded('sodium')) {
-            $encryption = new Encryption(new SodiumEncryption('euyq74tjfdskjFDSGq74'));
-            $encryptedString = $encryption->encrypt('plain-text');
-            $decryptedString = $encryption->decrypt($encryptedString);
+        $encryption = new Encryption(new SodiumEncryption('euyq74tjfdskjFDSGq74'));
+        $encryptedString = $encryption->encrypt('plain-text');
+        $decryptedString = $encryption->decrypt($encryptedString);
 
-            $this->assertStringEndsNotWith('==', $encryptedString);
-            $this->assertSame(112, strlen($encryptedString));
-            $this->assertSame('plain-text', $decryptedString);
-        }
+        $this->assertStringEndsNotWith('==', $encryptedString);
+        $this->assertSame(112, strlen($encryptedString));
+        $this->assertSame('plain-text', $decryptedString);
     }
 
     public function testOpenSslEncrpytionEncryptOnEmptyStringKey()
@@ -51,9 +49,18 @@ class EncryptionTest extends TestCase
 
     public function testSodiumEncrpytionEncryptOnEmptyStringKey()
     {
-        if (extension_loaded('sodium')) {
-            $this->expectException(\InvalidArgumentException::class);
-            new Encryption(new SodiumEncryption(''));
-        }
+        $this->expectException(\InvalidArgumentException::class);
+        new Encryption(new SodiumEncryption(''));
+    }
+
+    public function testDecryptWithNoHash()
+    {
+        $encryption1 = new Encryption(new OpenSslEncryption('12345678990-=====-==='));
+        $decryptedString1 = $encryption1->decrypt("wrong-hash");
+        $this->assertFalse($decryptedString1);
+
+        $encryption2 = new Encryption(new SodiumEncryption('12345678990-=====-==='));
+        $decryptedString2 = $encryption2->decrypt("wrong-hash");
+        $this->assertFalse($decryptedString2);
     }
 }

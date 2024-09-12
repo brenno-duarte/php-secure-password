@@ -28,40 +28,53 @@ class SodiumEncryption implements AbstractAdapterInterface
     }
 
     /**
-     * Encrypt the message.
-     *
-     * @param string $data data to be encrypted
-     * 
-     * @return mixed
+     * {@inheritDoc}
      */
     public function encrypt(mixed $data): mixed
     {
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-        $token = base64_encode($nonce . sodium_crypto_secretbox($data, $nonce, $this->key) . '&&' . $this->key);
-        return $token;
+        return base64_encode(
+            $nonce . sodium_crypto_secretbox(
+                $data,
+                $nonce,
+                $this->key
+            ) . '&&' . $this->key
+        );
     }
 
     /**
-     * Decrypt the message.
-     *
-     * @param mixed $token encrypted token
-
-     * @return mixed
+     * {@inheritDoc}
      */
     public function decrypt(mixed $token): mixed
     {
         $decoded = base64_decode($token);
-        list($decoded, $this->key) = explode('&&', $decoded);
+        $explode_value = explode('&&', $decoded);
+        if (!array_key_exists(1, $explode_value)) return false;
+
+        list($decoded, $this->key) = $explode_value;
         if ($decoded === false) throw new \Exception('The decoding failed');
 
         if (
-            mb_strlen($decoded, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)
+            mb_strlen($decoded, '8bit') <
+            (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)
         ) {
             throw new \Exception('The token was truncated');
         }
 
-        $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
-        $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
+        $nonce = mb_substr(
+            $decoded,
+            0,
+            SODIUM_CRYPTO_SECRETBOX_NONCEBYTES,
+            '8bit'
+        );
+
+        $ciphertext = mb_substr(
+            $decoded,
+            SODIUM_CRYPTO_SECRETBOX_NONCEBYTES,
+            null,
+            '8bit'
+        );
+
         $plain = sodium_crypto_secretbox_open($ciphertext, $nonce, $this->key);
         if ($plain === false) throw new \Exception('The message was tampered with in transit');
         return $plain;

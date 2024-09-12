@@ -18,12 +18,12 @@ class SecurePasswordTest extends TestCase
     {
         $config = [
             'algo' => AlgorithmEnum::ARGON2I,
-            'cost' => 10,
+            'cost' => 12,
             'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
             'time_cost' => PASSWORD_ARGON2_DEFAULT_TIME_COST,
             'threads' => PASSWORD_ARGON2_DEFAULT_THREADS
         ];
-        
+
         $password = new SecurePassword($config);
         $hash = $password->createHash('my_password')->getHash();
 
@@ -67,14 +67,14 @@ class SecurePasswordTest extends TestCase
 
     public function testCreateWithOtherAlgorithm()
     {
-        /* Example 1 */
+        // Example 1
         $password = new SecurePassword();
         $hash = $password->useArgon2()->createHash('my_password')->getHash();
         $needs = $password->useDefault()->needsRehash('my_password', $hash);
 
         $this->assertIsString($needs);
 
-        /* Example 2 */
+        // Example 2
         $password_bcrypt = new SecurePassword([
             'algo' => AlgorithmEnum::BCRYPT
         ]);
@@ -82,7 +82,7 @@ class SecurePasswordTest extends TestCase
         $needs2 = $password_bcrypt->needsRehash('my_password', $hash);
         $this->assertIsString($needs2);
 
-        /* Example 3 */
+        // Example 3
         $password_argon = new SecurePassword([
             'algo' => AlgorithmEnum::ARGON2I
         ]);
@@ -101,7 +101,7 @@ class SecurePasswordTest extends TestCase
     {
         $password = new SecurePassword();
         $hash = $password->createHash('my_password')->verifyHash();
-        $hash2 = $password->verifyHash(md5('WrongHashTest'), $this->wait_time);
+        $hash2 = $password->verifyHash(md5('WrongHashTest'), wait_microseconds: $this->wait_time);
 
         $this->assertTrue($hash);
         $this->assertFalse($hash2);

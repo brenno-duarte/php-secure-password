@@ -39,7 +39,7 @@ class SecurePassword extends HashAlgorithm
         ($this->config["algo"] instanceof AlgorithmEnum) ?
             $algo_config = $this->config["algo"]->value :
             $algo_config = $this->config["algo"];
-        
+
         $this->options = $this->config;
         $this->algo = ($algo_config == "default") ? PASSWORD_DEFAULT : $algo_config;
         $this->setPepper();
@@ -56,7 +56,13 @@ class SecurePassword extends HashAlgorithm
     {
         $this->password = $password;
         $pwd_peppered = $this->passwordPeppered($this->password);
-        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
+
+        $this->pwd_hashed = password_hash(
+            $pwd_peppered,
+            $this->algo,
+            $this->options
+        );
+
         return $this;
     }
 
@@ -142,7 +148,9 @@ class SecurePassword extends HashAlgorithm
         #[SensitiveParameter] string $password,
         #[SensitiveParameter] string $hash
     ): string|false {
-        return (password_needs_rehash($hash, $this->algo)) ? $this->createHash($password)->getHash() : false;
+        return (password_needs_rehash($hash, $this->algo)) ?
+            $this->createHash($password)->getHash() :
+            false;
     }
 
     /**
