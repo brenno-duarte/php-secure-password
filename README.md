@@ -48,7 +48,7 @@ $config = [
 $password = new SecurePassword($config);
 ```
 
-You can use the following encryptions: `HashAlgorithm::DEFAULT`, `HashAlgorithm::BCRYPT`, `HashAlgorithm::ARGON2I`, `HashAlgorithm::ARGON2ID`.
+You can use the following encryptions: `AlgorithmEnum::DEFAULT`, `AlgorithmEnum::BCRYPT`, `AlgorithmEnum::ARGON2I`, `AlgorithmEnum::ARGON2ID`.
 
 ## Changing the encryption algorithm
 
