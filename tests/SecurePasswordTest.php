@@ -51,16 +51,21 @@ class SecurePasswordTest extends TestCase
         $password = new SecurePassword([
             'algo' => AlgorithmEnum::ARGON2I
         ]);
-        $hash = $password->createHash('my_password')->getHash();
 
+        $hash = $password->createHash('my_password')->getHash();
         $this->assertIsString($hash);
     }
 
     public function testCreateWithAlgorithm()
     {
         $password = new SecurePassword();
+
         $hash = $password->useArgon2()->createHash('my_password')->getHash();
-        $res = $password->useArgon2()->verifyHash('my_password', $hash, $this->wait_time);
+        $res = $password->useArgon2()->verifyHash(
+            'my_password',
+            $hash,
+            $this->wait_time
+        );
 
         $this->assertTrue($res);
     }
@@ -100,8 +105,12 @@ class SecurePasswordTest extends TestCase
     public function testCreateAndVerifyHashChained()
     {
         $password = new SecurePassword();
+
         $hash = $password->createHash('my_password')->verifyHash();
-        $hash2 = $password->verifyHash(md5('WrongHashTest'), wait_microseconds: $this->wait_time);
+        $hash2 = $password->verifyHash(
+            md5('WrongHashTest'),
+            wait_microseconds: $this->wait_time
+        );
 
         $this->assertTrue($hash);
         $this->assertFalse($hash2);
@@ -110,27 +119,47 @@ class SecurePasswordTest extends TestCase
     public function testCreateAndVerifyHash()
     {
         $password = new SecurePassword();
+
         $hash = $password->createHash('my_password')->getHash();
-        $res = $password->verifyHash('my_password', $hash, $this->wait_time);
+        $res = $password->verifyHash(
+            'my_password',
+            $hash,
+            $this->wait_time
+        );
+
         $this->assertTrue($res);
     }
 
     public function testVerifyHash()
     {
         $password = new SecurePassword();
+
         $hash = $password->createHash('my_password')->getHash();
-        $res = $password->verifyHash('my_password', $hash, $this->wait_time);
+        $res = $password->verifyHash(
+            'my_password',
+            $hash,
+            $this->wait_time
+        );
+
         $this->assertTrue($res);
 
         $password = new SecurePassword();
-        $res = $password->createHash('my_password')->verifyHash(wait_microseconds: $this->wait_time);
+
+        $res = $password
+            ->createHash('my_password')
+            ->verifyHash(wait_microseconds: $this->wait_time);
+
         $this->assertTrue($res);
     }
 
     public function testVerifyHashWrong()
     {
         $hash = '$2y$10$Er0wYRuY7LTYkmWmL8YMMeuxiRIEZ7Vn/8kPb4.aNkzIFRN/N.qG.';
-        $res = (new SecurePassword)->verifyHash('mypassword', $hash, $this->wait_time);
+        $res = (new SecurePassword)->verifyHash(
+            'mypassword',
+            $hash,
+            $this->wait_time
+        );
 
         $this->assertFalse($res);
     }
@@ -138,7 +167,9 @@ class SecurePasswordTest extends TestCase
     public function testVerifyRehash()
     {
         $hash = '$2y$10$Er0wYRuY7LTYkmWmL8YMMeuxiRIEZ7Vn/8kPb4.aNkzIFRN/N.qG.';
-        $res = (new SecurePassword)->useArgon2()->needsRehash('mypassword', $hash);
+
+        $secure_password = new SecurePassword();
+        $res = $secure_password->useArgon2()->needsRehash('mypassword', $hash);
 
         $this->assertIsString($res);
     }

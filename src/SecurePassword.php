@@ -56,13 +56,8 @@ class SecurePassword extends HashAlgorithm
     {
         $this->password = $password;
         $pwd_peppered = $this->passwordPeppered($this->password);
-
-        $this->pwd_hashed = password_hash(
-            $pwd_peppered,
-            $this->algo,
-            $this->options
-        );
-
+        $this->pwd_hashed = password_hash($pwd_peppered, $this->algo, $this->options);
+        
         return $this;
     }
 
@@ -148,7 +143,7 @@ class SecurePassword extends HashAlgorithm
         #[SensitiveParameter] string $password,
         #[SensitiveParameter] string $hash
     ): string|false {
-        return (password_needs_rehash($hash, $this->algo)) ?
+        return (password_needs_rehash($hash, $this->algo, $this->options) === true) ?
             $this->createHash($password)->getHash() :
             false;
     }
