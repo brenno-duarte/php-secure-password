@@ -1,5 +1,13 @@
 # Released Notes
 
+## v3.1.5 - (2026-04-08)
+
+### Removed
+
+- Removed `paragonie/sodium_compat` package
+
+-----------------------------------------------------------
+
 ## v3.1.4 - (2024-09-12)
 
 ### Fixed
